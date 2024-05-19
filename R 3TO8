@@ -1,0 +1,132 @@
+Expt 3:
+#DATA PREPROCESSING:
+
+data <- read.csv("/content/bmi.csv", header = TRUE)
+
+missing_values <- anyNA(data)
+if (missing_values) {
+ cat("There are missing values in the data.\n")
+ data <- na.omit(data)
+} else {
+ cat("There are no missing values in the data.\n")
+}
+
+write.csv(data, "preprocessed_bmi.csv", row.names = FALSE)
+
+cat("Summary Statistics:\n")
+summary(data)
+
+cat("\nDimensions of the dataset:\n")
+cat(paste("Number of rows:", nrow(data), "\n"))
+cat(paste("Number of columns:", ncol(data), "\n"))
+
+cat("\nStructure of the dataset:\n")
+str(data)
+
+Expt 4:
+#BOX-PLOT:
+
+data <- read.csv("/content/bmi.csv", header = TRUE)
+boxplot(data$Height, main = "Boxplot of Height", ylab = "Height (cm)")
+boxplot(data$Weight, main = "Boxplot of Weight", ylab = "Weight (kg)")
+boxplot(Height ~ Index, data = data, main = "Boxplot of Height by Index", ylab = "Height (cm)")
+boxplot(Weight ~ Index, data = data, main = "Boxplot of Weight by Index", ylab = "Weight (kg)")
+
+Expt 5:
+#CORRELATION ANALYSIS
+
+data <- read.csv("/content/bmi.csv", header = TRUE)
+
+if (anyNA(data)) {
+  data <- na.omit(data)
+}
+
+data_numeric <- data[, sapply(data, is.numeric)]
+correlation_matrix <- cor(data_numeric, method = "pearson")
+
+heatmap(correlation_matrix,
+ col = colorRampPalette(c("#EFF3FF", "#BDD7E7", "#6BAED6", "#3182BD","#08519C"))(100),
+ scale = "none",
+ symm = TRUE,
+ main = "Correlation Heatmap",
+ cex.axis = 0.8,
+ cex.lab = 0.8,
+ cexRow = 1,
+ cexCol = 1)
+
+Expt 6:
+#TREND ANALYSIS
+
+data <- read.csv("/content/sales_data_sample.csv", header = TRUE)
+if (!("SALES" %in% names(data)) || !("MONTH_ID" %in% names(data))) {
+ stop("One or more required variables (SALES or MONTH_ID) not found in the dataset.")
+}
+months <- unique(data$MONTH_ID)
+sales <- tapply(data$SALES, data$MONTH_ID, sum)
+plot(months, sales, type = "o", col = "blue", xlab = "Month", ylab = "Sales",
+main = "Monthly Sales Trend")
+month_numeric <- 1:length(months)
+model <- lm(sales ~ month_numeric)
+lines(months, predict(model), col = "red")
+summary(model)
+
+Expt 7:
+#PREDICTIVE ANALYSIS
+
+diabetes_data <- read.csv("/content/diabetes.csv")
+
+X <- diabetes_data[, c("BMI", "Glucose")]
+y <- diabetes_data$Outcome
+
+model <- glm(Outcome ~ BMI + Glucose, family = binomial(link = "logit"), data =
+diabetes_data)
+
+bmi_values <- seq(min(diabetes_data$BMI), max(diabetes_data$BMI), length.out =
+100)
+glucose_values <- seq(min(diabetes_data$Glucose), max(diabetes_data$Glucose),
+length.out = 100)
+grid <- expand.grid(BMI = bmi_values, Glucose = glucose_values)
+
+predictions_grid <- predict(model, newdata = grid, type = "response")
+
+predictions_matrix <- matrix(predictions_grid, nrow = length(bmi_values), ncol =
+length(glucose_values))
+
+filled.contour(bmi_values, glucose_values, predictions_matrix,
+ color.palette = colorRampPalette(c("lightblue", "darkblue")),
+ main = "Diabetes Prediction",
+ xlab = "BMI",
+ ylab = "Glucose")
+
+Expt 8:
+
+#PRESCRIPTIVE ANALYSIS
+
+data <- read.csv("/content/sales_data_sample.csv", header = TRUE)
+if (!("SALES" %in% names(data)) || !("MONTH_ID" %in% names(data))) {
+ stop("One or more required variables (SALES or MONTH_ID) not found in the dataset.")
+}
+months <- unique(data$MONTH_ID)
+sales <- tapply(data$SALES, data$MONTH_ID, sum)
+
+plot(months, sales, type = "o", col = "blue", xlab = "Month", ylab = "Sales",
+main = "Monthly Sales Trend")
+month_numeric <- 1:length(months)
+model <- lm(sales ~ month_numeric)
+
+abline(model, col = "red")
+
+summary(model)
+future_months <- 6
+future_month_numeric <- seq(max(month_numeric) + 1, max(month_numeric) +
+future_months)
+future_sales <- predict(model, newdata = data.frame(month_numeric =
+future_month_numeric))
+
+plot(c(months, future_month_numeric), c(sales, future_sales), type = "o", col =
+"blue",
+ xlab = "Month", ylab = "Sales", main = "Predicted Monthly Sales")
+
+lines(future_month_numeric, future_sales, col = "red")
+cat("Predicted Sales for Future Months:\n")
+print(data.frame(Month = future_month_numeric, Predicted_Sales = future_sales))
